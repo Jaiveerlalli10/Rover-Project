@@ -107,16 +107,25 @@ SYSTEM ARCHITECTURE:
     ROADMAP:
 
     [x] 4WD motor control
+    
     [x] Wireless web controller
+    
     [x] FreeRTOS task structure
+    
     [x] Motor command queue
+    
     [x] Software emergency stop
+    
     [ ] TFT display
+    
     [ ] Ultrasonic obstacle detection
+    
     [ ] Autonomous navigation
+    
     [ ] Wheel encoders
+    
     [ ] PID motor control
-    [ ] Camera / video streaming
+    
     
           
 
