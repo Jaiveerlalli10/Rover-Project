@@ -118,7 +118,7 @@ SYSTEM ARCHITECTURE:
     
     [ ] TFT display
     
-    [ ] Ultrasonic obstacle detection
+    [x] Ultrasonic obstacle detection
     
     [ ] Autonomous navigation
     
