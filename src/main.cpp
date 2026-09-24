@@ -1,5 +1,5 @@
 #include <Arduino.h>
-
+#include "autonomous.h"
 #include "motors.h"
 #include "rover_wifi.h"
 #include "sensors.h"
@@ -49,6 +49,15 @@ void setup()
     xTaskCreate(
         sensorTask,
         "Sensor Task",
+        2048,
+        NULL,
+        1,
+        NULL
+    );
+
+    xTaskCreate(
+        autonomousTask,
+        "Autonomous Task",
         2048,
         NULL,
         1,
