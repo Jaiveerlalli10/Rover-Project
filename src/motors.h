@@ -4,7 +4,8 @@
 #include <freertos/FreeRTOS.h>
 #include <freertos/queue.h>
 
-struct MotorCommand {
+struct MotorCommand
+{
     int frontLeft;
     int frontRight;
     int backLeft;
@@ -13,11 +14,15 @@ struct MotorCommand {
 
 extern QueueHandle_t motorQueue;
 
+void setupMotors();
+
 void stopRobot();
+
 void moveForward(int speed);
 void moveBackward(int speed);
 void turnLeft(int speed);
 void turnRight(int speed);
+
 void printMotors();
 
 void motorTask(void *parameter);
