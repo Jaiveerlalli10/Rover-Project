@@ -3,6 +3,7 @@
 #include <WebServer.h>
 #include "rover_wifi.h"
 #include "motors.h"
+#include "control.h"
 
 const char* ssid = "ESP32_Rover";
 const char* password = "rover123";
@@ -21,251 +22,287 @@ void startWiFi() {
     server.on("/", []() {
 
         String html = R"rawliteral(
-            <!DOCTYPE html>
-            <html>
+           <!DOCTYPE html>
+<html>
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+    <title>ESP32 Rover</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
+        }
 
-            <head>
-                <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: #000000;
+            color: white;
+            font-family: Arial, sans-serif;
+            touch-action: none;
+        }
+
+        body {
+            min-height: 100svh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        h1 {
+            position: absolute;
+            top: 5vh;
+            margin: 0;
+
+            font-size: clamp(20px, 6vw, 30px);
+            letter-spacing: 4px;
+            font-weight: bold;
+        }
+
+        .controller {
+
+            --button-size: min(26vw, 105px);
+            --gap: min(3vw, 12px);
+
+            display: grid;
+
+            grid-template-columns:
+                var(--button-size)
+                var(--button-size)
+                var(--button-size);
+
+            grid-template-rows:
+                var(--button-size)
+                var(--button-size)
+                var(--button-size);
+
+            gap: var(--gap);
+
+            align-items: center;
+            justify-items: center;
+        }
+
+        .reset-container {
+            position: fixed;
+            bottom: 20px;
+            left: 0;
+            width: 100%;
+            text-align: center;
+        }
 
-                <title>ESP32 Rover</title>
+        .reset {
+            width: auto;
+            height: auto;
+            padding: 12px 30px;
+            font-size: 18px;
+            border-radius: 10px;
+        }
 
-                <style>
+        button {
 
-                    * {
-                        box-sizing: border-box;
-                        user-select: none;
-                        -webkit-user-select: none;
-                        -webkit-touch-callout: none;
-                    }
+            width: var(--button-size);
+            height: var(--button-size);
 
-                    html, body {
-                        margin: 0;
-                        padding: 0;
-                        width: 100%;
-                        height: 100%;
-                        overflow: hidden;
-                        background: #000000;
-                        color: white;
-                        font-family: Arial, sans-serif;
-                        touch-action: none;
-                    }
+            border: 2px solid white;
+            border-radius: 50%;
 
-                    body {
-                        min-height: 100svh;
-                        display: flex;
-                        flex-direction: column;
-                        align-items: center;
-                        justify-content: center;
-                    }
+            background: black;
+            color: white;
 
-                    h1 {
-                        position: absolute;
-                        top: 5vh;
-                        margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
 
-                        font-size: clamp(20px, 6vw, 30px);
-                        letter-spacing: 4px;
-                        font-weight: bold;
-                    }
+            padding: 0;
 
-                    .controller {
+            touch-action: none;
 
-                        --button-size: min(26vw, 105px);
-                        --gap: min(3vw, 12px);
+            -webkit-tap-highlight-color: transparent;
+        }
 
-                        display: grid;
+        button:active {
+            background: white;
+        }
 
-                        grid-template-columns:
-                            var(--button-size)
-                            var(--button-size)
-                            var(--button-size);
+        /* CSS arrow */
 
-                        grid-template-rows:
-                            var(--button-size)
-                            var(--button-size)
-                            var(--button-size);
+        .arrow {
 
-                        gap: var(--gap);
+            width: 45%;
+            height: 45%;
 
-                        align-items: center;
-                        justify-items: center;
-                    }
+            background: white;
 
-                    button {
+            clip-path: polygon(
+                50% 0%,
+                100% 40%,
+                65% 40%,
+                65% 100%,
+                35% 100%,
+                35% 40%,
+                0% 40%
+            );
+        }
 
-                        width: var(--button-size);
-                        height: var(--button-size);
+        button:active .arrow {
+            background: black;
+        }
 
-                        border: 2px solid white;
-                        border-radius: 50%;
+        .arrow.right {
+            transform: rotate(90deg);
+        }
 
-                        background: black;
-                        color: white;
+        .arrow.down {
+            transform: rotate(180deg);
+        }
 
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
+        .arrow.left {
+            transform: rotate(270deg);
+        }
 
-                        padding: 0;
+        /* Stop button */
 
-                        touch-action: none;
+        .stop {
+            background: #c40000;
+            border-color: #ff4444;
 
-                        -webkit-tap-highlight-color: transparent;
-                    }
+            font-size: clamp(14px, 4vw, 20px);
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
 
-                    button:active {
-                        background: white;
-                    }
+        .stop:active {
+            background: #ff3333;
+        }
 
-                    /* CSS arrow */
+        .empty {
+            width: var(--button-size);
+            height: var(--button-size);
+        }
 
-                    .arrow {
+    </style>
 
-                        width: 45%;
-                        height: 45%;
+</head>
 
-                        background: white;
+<body>
 
-                        clip-path: polygon(
-                            50% 0%,
-                            100% 40%,
-                            65% 40%,
-                            65% 100%,
-                            35% 100%,
-                            35% 40%,
-                            0% 40%
-                        );
-                    }
+    <h1>ESP32 ROVER</h1>
 
-                    button:active .arrow {
-                        background: black;
-                    }
 
-                    .arrow.right {
-                        transform: rotate(90deg);
-                    }
+    <div class="controller">
 
-                    .arrow.down {
-                        transform: rotate(180deg);
-                    }
+        <!-- Top -->
 
-                    .arrow.left {
-                        transform: rotate(270deg);
-                    }
+        <div class="empty"></div>
 
-                    /* Stop button */
+        <button
+            onpointerdown="startCommand('/forward')"
+            onpointerup="stopCommand()"
+            onpointercancel="stopCommand()"
+            onpointerleave="stopCommand()">
 
-                    .stop {
-                        background: #c40000;
-                        border-color: #ff4444;
+            <span class="arrow up"></span>
 
-                        font-size: clamp(14px, 4vw, 20px);
-                        font-weight: bold;
-                        letter-spacing: 1px;
-                    }
+        </button>
 
-                    .stop:active {
-                        background: #ff3333;
-                    }
+        <div class="empty"></div>
 
-                    .empty {
-                        width: var(--button-size);
-                        height: var(--button-size);
-                    }
 
-                </style>
+        <!-- Middle -->
 
-            </head>
+        <button
+            onpointerdown="startCommand('/left')"
+            onpointerup="stopCommand()"
+            onpointercancel="stopCommand()"
+            onpointerleave="stopCommand()">
 
-            <body>
+            <span class="arrow left"></span>
 
-                <h1>ESP32 ROVER</h1>
+        </button>
 
-                <div class="controller">
 
-                    <!-- Top -->
-                    <div class="empty"></div>
+        <!-- EMERGENCY STOP -->
 
-                    <button
-                        onpointerdown="startCommand('/forward')"
-                        onpointerup="stopCommand()"
-                        onpointercancel="stopCommand()"
-                        onpointerleave="stopCommand()">
+        <button
+            class="stop"
+            onclick="fetch('/emergency')">
 
-                        <span class="arrow up"></span>
+            STOP
 
-                    </button>
+        </button>
 
-                    <div class="empty"></div>
 
+        <button
+            onpointerdown="startCommand('/right')"
+            onpointerup="stopCommand()"
+            onpointercancel="stopCommand()"
+            onpointerleave="stopCommand()">
 
-                    <!-- Middle -->
+            <span class="arrow right"></span>
 
-                    <button
-                        onpointerdown="startCommand('/left')"
-                        onpointerup="stopCommand()"
-                        onpointercancel="stopCommand()"
-                        onpointerleave="stopCommand()">
+        </button>
 
-                        <span class="arrow left"></span>
 
-                    </button>
+        <!-- Bottom -->
 
+        <div class="empty"></div>
 
-                    <button
-                        class="stop"
-                        onclick="stopCommand()">
+        <button
+            onpointerdown="startCommand('/backward')"
+            onpointerup="stopCommand()"
+            onpointercancel="stopCommand()"
+            onpointerleave="stopCommand()">
 
-                        STOP
+            <span class="arrow down"></span>
 
-                    </button>
+        </button>
 
+        <div class="empty"></div>
 
-                    <button
-                        onpointerdown="startCommand('/right')"
-                        onpointerup="stopCommand()"
-                        onpointercancel="stopCommand()"
-                        onpointerleave="stopCommand()">
+    </div>
 
-                        <span class="arrow right"></span>
 
-                    </button>
+    <!-- RESET -->
 
+    <div class="reset-container">
 
-                    <!-- Bottom -->
+        <button
+            class="reset"
+            onclick="fetch('/reset')">
 
-                    <div class="empty"></div>
+            RESET
 
-                    <button
-                        onpointerdown="startCommand('/backward')"
-                        onpointerup="stopCommand()"
-                        onpointercancel="stopCommand()"
-                        onpointerleave="stopCommand()">
+        </button>
 
-                        <span class="arrow down"></span>
+    </div>
 
-                    </button>
 
-                    <div class="empty"></div>
+    <script>
 
-                </div>
+        function startCommand(command) {
+            fetch(command);
+        }
 
+        function stopCommand() {
+            fetch('/stop');
+        }
 
-                <script>
+    </script>
 
-                    function startCommand(command) {
-                        fetch(command);
-                    }
 
-                    function stopCommand() {
-                        fetch('/stop');
-                    }
+</body>
 
-                </script>
-
-            </body>
-
-            </html>
+</html>
         )rawliteral";
 
         server.send(200, "text/html", html);
@@ -274,7 +311,7 @@ void startWiFi() {
 
     // Forward
     server.on("/forward", []() {
-    moveForward(100);
+    moveForward(120);
 
     Serial.println("FORWARD");
     printMotors();
@@ -284,7 +321,7 @@ void startWiFi() {
 
 
    server.on("/backward", []() {
-    moveBackward(100);
+    moveBackward(120);
 
     Serial.println("BACKWARD");
     printMotors();
@@ -293,7 +330,7 @@ void startWiFi() {
 });
 
 server.on("/left", []() {
-    turnLeft(100);
+    turnLeft(120);
 
     Serial.println("LEFT");
     printMotors();
@@ -302,7 +339,7 @@ server.on("/left", []() {
 });
 
 server.on("/right", []() {
-    turnRight(100);
+    turnRight(120);
 
     Serial.println("RIGHT");
     printMotors();
@@ -319,9 +356,29 @@ server.on("/stop", []() {
     server.send(200, "text/plain", "Stopped");
 });
 
-    server.begin();
 
-    Serial.println("Web server started!");
+server.on("/emergency", []() {
+    setEmergencyStop(true);
+
+    Serial.println("EMERGENCY STOP");
+    printMotors();
+
+    server.send(200, "text/plain", "Emergency stop activated");
+});
+
+
+server.on("/reset", []() {
+    setEmergencyStop(false);
+
+    Serial.println("EMERGENCY STOP RESET");
+
+    server.send(200, "text/plain", "Emergency stop reset");
+});
+
+
+server.begin();
+
+Serial.println("Web server started!");
 }
 
 
@@ -329,17 +386,14 @@ void handleWiFi() {
     server.handleClient();
 }
 
+
 void wifiTask(void *paramter) {
     while (true) {
         handleWiFi();
 
-        vTaskDelay(pdMS_TO_TICKS(10)); // Delay for 10 milliseconds
+        vTaskDelay(pdMS_TO_TICKS(10));
     }
 }
-
-
-
-
 
 
 
