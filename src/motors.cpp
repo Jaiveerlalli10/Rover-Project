@@ -2,6 +2,7 @@
 #include <freertos/FreeRTOS.h>
 #include <freertos/queue.h>
 #include "motors.h"
+#include "control.h"
 
 // -------------------------
 // TB6612 #1 pins
@@ -45,6 +46,38 @@ MotorCommand currCommand;
 // -------------------------
 // Helper function
 // -------------------------
+
+void setupMotors()
+{
+    pinMode(TB1_STBY, OUTPUT);
+
+    pinMode(TB1_PWMA, OUTPUT);
+    pinMode(TB1_AIN1, OUTPUT);
+    pinMode(TB1_AIN2, OUTPUT);
+
+    pinMode(TB1_PWMB, OUTPUT);
+    pinMode(TB1_BIN1, OUTPUT);
+    pinMode(TB1_BIN2, OUTPUT);
+
+
+    pinMode(TB2_STBY, OUTPUT);
+
+    pinMode(TB2_PWMA, OUTPUT);
+    pinMode(TB2_AIN1, OUTPUT);
+    pinMode(TB2_AIN2, OUTPUT);
+
+    pinMode(TB2_PWMB, OUTPUT);
+    pinMode(TB2_BIN1, OUTPUT);
+    pinMode(TB2_BIN2, OUTPUT);
+
+
+    // Enable both TB6612 motor drivers
+    digitalWrite(TB1_STBY, HIGH);
+    digitalWrite(TB2_STBY, HIGH);
+
+    // Start stopped
+    stopRobot();
+}
 
 void setMotor(int pwmPin, int in1, int in2, int speed)
 {
@@ -92,7 +125,9 @@ void stopRobot()
 
 void moveForward(int speed)
 {
-    currCommand = {speed, speed, speed, speed};
+    if (isEmergencyStopped()) return;
+
+    currCommand = {speed, -speed, speed, speed};
 
     if (motorQueue != NULL)
     {
@@ -103,7 +138,9 @@ void moveForward(int speed)
 
 void moveBackward(int speed)
 {
-    currCommand = {-speed, -speed, -speed, -speed};
+    if (isEmergencyStopped()) return;
+
+    currCommand = {-speed, speed, -speed, -speed};
 
     if (motorQueue != NULL)
     {
@@ -114,7 +151,9 @@ void moveBackward(int speed)
 
 void turnLeft(int speed)
 {
-    currCommand = {-speed, speed, -speed, speed};
+    if (isEmergencyStopped()) return;
+
+    currCommand = {-speed, -speed, -speed, speed};
 
     if (motorQueue != NULL)
     {
@@ -125,7 +164,9 @@ void turnLeft(int speed)
 
 void turnRight(int speed)
 {
-    currCommand = {speed, -speed, speed, -speed};
+    if (isEmergencyStopped()) return;
+
+    currCommand = {speed, speed, speed, -speed};
 
     if (motorQueue != NULL)
     {
