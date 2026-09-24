@@ -37,7 +37,8 @@ HARDWARE:
 
   Planned
   - 3.5" ST7796S TFT
-  - ultrasonic obstacle sensor
+  - 3D printed body
+  - Battery Monitoring
 
 SOFTWARE:
   - C++
@@ -91,7 +92,13 @@ SYSTEM ARCHITECTURE:
           Handles the WiFi network, web server, and WiFi task
         
       - control.cpp/control.h:
-          Handles rover control states such as the emergency stop.
+          Handles rover control states such as manual and autonomous mode.
+
+      - sensors.cpp/sensors.h
+          Handles the ultrasonic sensor mounted at the front of the car to deploy an emergency stop.
+
+      - autnomous.cpp/autonomous.h
+          Handles the autonomous mode of the rover driving
 
     MOTOR CONTROL:
     Each motor is controlled using
@@ -125,11 +132,11 @@ SYSTEM ARCHITECTURE:
     
     [x] Ultrasonic obstacle detection
     
-    [ ] Autonomous navigation
+    [x] Autonomous navigation
     
-    [ ] Wheel encoders
-    
-    [ ] PID motor control
+    [ ] Battery Monitoring
+
+    [ ] 3D printed body
     
     
           
