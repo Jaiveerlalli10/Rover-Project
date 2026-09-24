@@ -5,8 +5,9 @@
 #define TRIG_PIN 16
 #define ECHO_PIN 4
 
-bool obstacleHandled = false;
+bool obstacleHandled = false; 
 int obstacleCount = 0;
+float currentDistance = 0;
 
 void setupSensors()
 {
@@ -32,11 +33,17 @@ float getDistance()
     return distance;
 }
 
+float getCurrentDistance()
+{
+    return currentDistance;
+}
+
 void sensorTask(void *parameter)
 {
     while (true)
     {
-        float distance = getDistance();
+        currentDistance = getDistance();
+        float distance = currentDistance;
 
         Serial.print("Distance: ");
         Serial.print(distance);
@@ -47,11 +54,15 @@ void sensorTask(void *parameter)
             obstacleCount = 0;
         }
 
-        if (distance <= 20 && !obstacleHandled && obstacleCount >= 3) {
-        
-            Serial.println("OBSTACLE DETECTED - EMERGENCY STOP!");
+        if (distance <= 20 && !obstacleHandled && obstacleCount >= 3)
+{
+            if (getRoverMode() == MANUAL)
+            {
+                Serial.println("OBSTACLE DETECTED - EMERGENCY STOP!");
 
-            setEmergencyStop(true);
+                setEmergencyStop(true);
+            }
+
             obstacleHandled = true;
         }
 
@@ -62,3 +73,4 @@ void sensorTask(void *parameter)
         vTaskDelay(pdMS_TO_TICKS(100));
     }
 }
+
