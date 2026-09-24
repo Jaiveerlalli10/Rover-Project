@@ -1,6 +1,11 @@
+<img width="4284" height="5712" alt="image" src="https://github.com/user-attachments/assets/c4dd1dd2-aa4e-424b-baf6-eea940189fc5" />
+
+
+
 ESP32 Rover:
   A modular 4WD rover built around an ESP32, FreeRTOS, and wireless control.
-  <img width="810" height="1080" alt="image" src="https://github.com/user-attachments/assets/a096225b-265a-4b7c-89ad-6a24d5d8022c" />
+
+  VIDEO: https://youtube.com/shorts/E6Apd3a_wUI?is=9W-wnkyobzcdhFxJ
 
 
 
