@@ -34,6 +34,14 @@
 #define TB2_BIN2 5
 
 
+
+// -------------------------
+// Motor calibration
+// -------------------------
+
+#define LEFT_MOTOR_OFFSET 20
+
+
 // -------------------------
 // Motor command queue
 // -------------------------
@@ -127,7 +135,7 @@ void moveForward(int speed)
 {
     if (isEmergencyStopped()) return;
 
-    currCommand = {speed, -speed, speed, speed};
+    currCommand = {speed + LEFT_MOTOR_OFFSET, -speed, speed + LEFT_MOTOR_OFFSET, speed};
 
     if (motorQueue != NULL)
     {
@@ -140,7 +148,7 @@ void moveBackward(int speed)
 {
     if (isEmergencyStopped()) return;
 
-    currCommand = {-speed, speed, -speed, -speed};
+    currCommand = {-speed - LEFT_MOTOR_OFFSET, speed, -speed - LEFT_MOTOR_OFFSET, -speed};
 
     if (motorQueue != NULL)
     {
