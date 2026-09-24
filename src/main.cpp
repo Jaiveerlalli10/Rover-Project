@@ -2,6 +2,7 @@
 
 #include "motors.h"
 #include "rover_wifi.h"
+#include "sensors.h"
 
 void setup()
 {
@@ -11,6 +12,12 @@ void setup()
 
     // Create motor command queue
     motorQueue = xQueueCreate(1, sizeof(MotorCommand));
+
+    // Set up motor pins and drivers
+    setupMotors();
+
+    // Set up sensors
+    setupSensors();
 
     // Start with the rover stopped
     stopRobot();
@@ -33,6 +40,16 @@ void setup()
         motorTask,
         "Motor Task",
         4096,
+        NULL,
+        1,
+        NULL
+    );
+
+    // Start sensor task
+    xTaskCreate(
+        sensorTask,
+        "Sensor Task",
+        2048,
         NULL,
         1,
         NULL
