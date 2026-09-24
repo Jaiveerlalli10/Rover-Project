@@ -21,11 +21,12 @@ void startWiFi() {
     // Main webpage
     server.on("/", []() {
 
-        String html = R"rawliteral(
-           <!DOCTYPE html>
+       String html = R"rawliteral(
+<!DOCTYPE html>
 <html>
 
 <head>
+
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 
     <title>ESP32 Rover</title>
@@ -90,22 +91,6 @@ void startWiFi() {
 
             align-items: center;
             justify-items: center;
-        }
-
-        .reset-container {
-            position: fixed;
-            bottom: 20px;
-            left: 0;
-            width: 100%;
-            text-align: center;
-        }
-
-        .reset {
-            width: auto;
-            height: auto;
-            padding: 12px 30px;
-            font-size: 18px;
-            border-radius: 10px;
         }
 
         button {
@@ -188,6 +173,44 @@ void startWiFi() {
         .empty {
             width: var(--button-size);
             height: var(--button-size);
+        }
+
+        /* Reset button */
+
+        .reset-container {
+            position: fixed;
+            bottom: 20px;
+            left: 0;
+            width: 100%;
+            text-align: center;
+        }
+
+        .reset {
+            width: auto;
+            height: auto;
+            padding: 12px 30px;
+            font-size: 18px;
+            border-radius: 10px;
+        }
+
+        /* Mode buttons */
+
+        .mode-buttons {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .mode-buttons button {
+            width: 140px;
+            height: auto;
+            padding: 12px 20px;
+            font-size: 16px;
+            border-radius: 10px;
         }
 
     </style>
@@ -287,6 +310,21 @@ void startWiFi() {
     </div>
 
 
+    <!-- MODE BUTTONS -->
+
+    <div class="mode-buttons">
+
+        <button onclick="setMode('manual')">
+            MANUAL
+        </button>
+
+        <button onclick="setMode('autonomous')">
+            AUTONOMOUS
+        </button>
+
+    </div>
+
+
     <script>
 
         function startCommand(command) {
@@ -297,13 +335,17 @@ void startWiFi() {
             fetch('/stop');
         }
 
+        function setMode(mode) {
+            fetch('/' + mode);
+        }
+
     </script>
 
 
 </body>
 
 </html>
-        )rawliteral";
+)rawliteral";
 
         server.send(200, "text/html", html);
     });
@@ -373,6 +415,18 @@ server.on("/reset", []() {
     Serial.println("EMERGENCY STOP RESET");
 
     server.send(200, "text/plain", "Emergency stop reset");
+});
+
+server.on("/manual", HTTP_GET,[]() {
+    setRoverMode(MANUAL);
+    stopRobot();
+    server.send(200, "text/plain", "Mode: MANUAL");
+});
+
+server.on("/autonomous", HTTP_GET,[]() {
+    setRoverMode(AUTONOMOUS);
+    stopRobot();
+    server.send(200, "text/plain", "Mode: AUTONOMOUS");
 });
 
 
